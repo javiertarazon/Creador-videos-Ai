@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, projects, scenes, templates } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,166 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// Projects
+export async function createProject(userId: number, data: {
+  title: string;
+  description?: string;
+  format: 'tiktok' | 'instagram_reels_9_16' | 'instagram_reels_1_1' | 'youtube_shorts';
+  template: 'corporate' | 'modern' | 'minimalist';
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.insert(projects).values({
+    userId,
+    title: data.title,
+    description: data.description,
+    format: data.format,
+    template: data.template,
+    status: 'draft',
+  });
+
+  // Get the inserted project
+  const inserted = await db
+    .select()
+    .from(projects)
+    .where(eq(projects.userId, userId))
+    .orderBy(desc(projects.createdAt))
+    .limit(1);
+
+  return inserted[0] || null;
+}
+
+export async function getUserProjects(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db
+    .select()
+    .from(projects)
+    .where(eq(projects.userId, userId))
+    .orderBy(desc(projects.createdAt));
+
+  return result;
+}
+
+export async function getProjectById(projectId: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db
+    .select()
+    .from(projects)
+    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function updateProject(projectId: number, userId: number, data: Partial<{
+  title: string;
+  description: string;
+  status: 'draft' | 'generating' | 'completed' | 'failed';
+  scriptContent: string;
+  sceneImages: string;
+  videoUrl: string;
+  duration: number;
+}>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db
+    .update(projects)
+    .set(data)
+    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)));
+
+  return result;
+}
+
+export async function deleteProject(projectId: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db
+    .delete(projects)
+    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)));
+
+  return result;
+}
+
+// Scenes
+export async function createScene(projectId: number, data: {
+  sceneNumber: number;
+  title: string;
+  description?: string;
+  subtitles?: string;
+  duration?: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(scenes).values({
+    projectId,
+    sceneNumber: data.sceneNumber,
+    title: data.title,
+    description: data.description,
+    subtitles: data.subtitles,
+    duration: data.duration || 3,
+  });
+
+  return result;
+}
+
+export async function getProjectScenes(projectId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db
+    .select()
+    .from(scenes)
+    .where(eq(scenes.projectId, projectId))
+    .orderBy(asc(scenes.sceneNumber));
+
+  return result;
+}
+
+export async function updateScene(sceneId: number, data: Partial<{
+  title: string;
+  description: string;
+  imageUrl: string;
+  imagePrompt: string;
+  subtitles: string;
+  duration: number;
+}>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db
+    .update(scenes)
+    .set(data)
+    .where(eq(scenes.id, sceneId));
+
+  return result;
+}
+
+// Templates
+export async function getTemplates() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.select().from(templates);
+  return result;
+}
+
+export async function getTemplateByType(type: 'corporate' | 'modern' | 'minimalist') {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db
+    .select()
+    .from(templates)
+    .where(eq(templates.type, type))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : null;
+}
