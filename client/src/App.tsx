@@ -7,17 +7,17 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Dashboard from "./pages/Dashboard";
 import ScriptEditor from "./pages/ScriptEditor";
 import FormatSelector from "./pages/FormatSelector";
-import ImageGenerator from "./pages/ImageGenerator";
-import VideoAssembly from "./pages/VideoAssembly";
+import ImageGeneratorV2 from "./pages/ImageGeneratorV2";
+import VideoAssemblyV2 from "./pages/VideoAssemblyV2";
 
 function Router() {
   return (
     <Switch>
-      <Route path={"\\"} component={Dashboard} />
-      <Route path={"/editor/:projectId"} component={ScriptEditor} />
-      <Route path={"/format/:projectId"} component={FormatSelector} />
-      <Route path={"/images/:projectId"} component={ImageGenerator} />
-      <Route path={"/assembly/:projectId"} component={VideoAssembly} />
+      <Route path="/" component={Dashboard} />
+      <Route path="/editor/:projectId" component={ScriptEditor} />
+      <Route path="/format/:projectId" component={FormatSelector} />
+      <Route path="/images/:projectId" component={ImageGeneratorV2} />
+      <Route path="/assembly/:projectId" component={VideoAssemblyV2} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

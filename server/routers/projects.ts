@@ -140,14 +140,11 @@ export const projectsRouter = router({
         throw new Error('Project not found');
       }
 
-      // Actualizar estado a "generating"
       await updateProject(input.projectId, ctx.user.id, { status: 'generating' });
 
       try {
-        // Generar prompt para el LLM
         const prompt = generateScriptPrompt(input.topic, project.format);
 
-        // Llamar al LLM
         const response = await invokeLLM({
           messages: [
             {
@@ -166,13 +163,11 @@ export const projectsRouter = router({
           : '';
         const scriptContent = parseScriptFromLLM(scriptText);
 
-        // Guardar guión en el proyecto
         await updateProject(input.projectId, ctx.user.id, {
           scriptContent: JSON.stringify(scriptContent),
           status: 'draft',
         });
 
-        // Crear escenas en la base de datos
         for (const scene of scriptContent.scenes) {
           await createScene(input.projectId, {
             sceneNumber: scene.sceneNumber,
@@ -188,7 +183,6 @@ export const projectsRouter = router({
           script: scriptContent,
         };
       } catch (error) {
-        // Actualizar estado a "failed"
         await updateProject(input.projectId, ctx.user.id, { status: 'failed' });
         throw error;
       }
@@ -213,28 +207,24 @@ export const projectsRouter = router({
       const sceneImages: Record<number, string> = {};
 
       try {
-        // Generar imagen para cada escena
         for (const scene of scriptContent.scenes) {
           const imageResult = await generateImage({
-            prompt: scene.imagePrompt,
+            prompt: scene.description,
           });
 
           if (imageResult.url) {
             sceneImages[scene.sceneNumber] = imageResult.url;
           }
 
-          // Actualizar la escena con la URL de la imagen
           const scenes = await getProjectScenes(input.projectId);
           const sceneRecord = scenes.find(s => s.sceneNumber === scene.sceneNumber);
           if (sceneRecord) {
             await updateScene(sceneRecord.id, {
               imageUrl: imageResult.url,
-              imagePrompt: scene.imagePrompt,
             });
           }
         }
 
-        // Guardar URLs de imágenes en el proyecto
         await updateProject(input.projectId, ctx.user.id, {
           sceneImages: JSON.stringify(sceneImages),
         });
@@ -277,10 +267,9 @@ export const projectsRouter = router({
 
       try {
         const imageResult = await generateImage({
-          prompt: scene.imagePrompt,
+          prompt: scene.description,
         });
 
-        // Actualizar la escena
         const scenes = await getProjectScenes(input.projectId);
         const sceneRecord = scenes.find(s => s.sceneNumber === input.sceneNumber);
         if (sceneRecord) {
@@ -289,11 +278,71 @@ export const projectsRouter = router({
           });
         }
 
+        const sceneImages = project.sceneImages ? JSON.parse(project.sceneImages) : {};
+        sceneImages[input.sceneNumber] = imageResult.url;
+        await updateProject(input.projectId, ctx.user.id, {
+          sceneImages: JSON.stringify(sceneImages),
+        });
+
         return {
           success: true,
           imageUrl: imageResult.url,
         };
       } catch (error) {
+        throw error;
+      }
+    }),
+
+  /**
+   * Ensamblar video a partir de imágenes
+   */
+  assembleVideo: protectedProcedure
+    .input(z.object({ projectId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const project = await getProjectById(input.projectId, ctx.user.id);
+      if (!project) {
+        throw new Error('Project not found');
+      }
+
+      if (!project.scriptContent) {
+        throw new Error('No script found.');
+      }
+
+      const scriptContent = JSON.parse(project.scriptContent);
+      const sceneImages = project.sceneImages ? JSON.parse(project.sceneImages) : {};
+
+      const allScenesHaveImages = scriptContent.scenes.every((s: any) => sceneImages[s.sceneNumber]);
+      if (!allScenesHaveImages) {
+        throw new Error('Not all scenes have images. Generate images first.');
+      }
+
+      try {
+        const { assembleVideo: assembleVideoService } = await import('../videoAssemblyService');
+
+        const scenesWithImages = scriptContent.scenes.map((s: any) => ({
+          ...s,
+          imageUrl: sceneImages[s.sceneNumber],
+        }));
+
+        const videoUrl = await assembleVideoService({
+          projectId: input.projectId,
+          userId: ctx.user.id,
+          scenes: scenesWithImages,
+          template: project.template as any,
+          format: project.format as any,
+        });
+
+        await updateProject(input.projectId, ctx.user.id, {
+          videoUrl,
+          status: 'completed',
+        });
+
+        return {
+          success: true,
+          videoUrl,
+        };
+      } catch (error) {
+        console.error('Error assembling video:', error);
         throw error;
       }
     }),
