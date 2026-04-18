@@ -30,7 +30,7 @@ export const projects = mysqlTable("projects", {
   userId: int("userId").notNull().references(() => users.id),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
-  status: mysqlEnum("status", ["draft", "generating", "completed", "failed"]).default("draft").notNull(),
+  status: mysqlEnum("status", ["draft", "generating", "script_generated", "generating_images", "images_generated", "assembling", "completed", "failed"]).default("draft").notNull(),
   format: mysqlEnum("format", ["tiktok", "instagram_reels_9_16", "instagram_reels_1_1", "youtube_shorts"]).notNull(),
   template: mysqlEnum("template", ["corporate", "modern", "minimalist"]).default("modern").notNull(),
   scriptContent: text("scriptContent"), // JSON string

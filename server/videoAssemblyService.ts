@@ -53,7 +53,16 @@ export async function assembleVideo(options: VideoAssemblyOptions): Promise<stri
       // Descargar imagen
       const imagePath = path.join(tempDir, `scene-${scene.sceneNumber}.jpg`);
       const imageResponse = await fetch(scene.imageUrl);
+      
+      if (!imageResponse.ok) {
+        throw new Error(`Failed to download image for scene ${scene.sceneNumber}: ${imageResponse.statusText}`);
+      }
+      
       const imageBuffer = await imageResponse.arrayBuffer();
+      if (imageBuffer.byteLength === 0) {
+        throw new Error(`Downloaded image for scene ${scene.sceneNumber} is empty`);
+      }
+      
       fs.writeFileSync(imagePath, Buffer.from(imageBuffer));
 
       // Agregar a lista de FFmpeg (duración en segundos)
@@ -64,9 +73,13 @@ export async function assembleVideo(options: VideoAssemblyOptions): Promise<stri
 
     // Crear video con FFmpeg
     const outputPath = path.join(tempDir, 'output.mp4');
-    const ffmpegCommand = `ffmpeg -f concat -safe 0 -i "${listFile}" -c:v libx264 -pix_fmt yuv420p -vf "scale=${dimensions.width}:${dimensions.height}" -y "${outputPath}"`;
+    const ffmpegCommand = `ffmpeg -f concat -safe 0 -i "${listFile}" -c:v libx264 -pix_fmt yuv420p -vf "scale=${dimensions.width}:${dimensions.height}:force_original_aspect_ratio=decrease,pad=${dimensions.width}:${dimensions.height}:(ow-iw)/2:(oh-ih)/2" -r 30 -vsync vfr -y "${outputPath}"`;
 
-    await execAsync(ffmpegCommand);
+    try {
+      await execAsync(ffmpegCommand);
+    } catch (ffmpegError) {
+      throw new Error(`FFmpeg error: ${ffmpegError instanceof Error ? ffmpegError.message : String(ffmpegError)}`);
+    }
 
     // Verificar que el archivo se creó
     if (!fs.existsSync(outputPath)) {

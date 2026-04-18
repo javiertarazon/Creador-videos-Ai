@@ -37,20 +37,14 @@ export default function VideoAssemblyV2() {
     setIsAssembling(true);
     setAssemblyProgress(0);
 
-    // Simular progreso
-    const progressInterval = setInterval(() => {
-      setAssemblyProgress(prev => {
-        if (prev >= 90) return prev;
-        return prev + Math.random() * 30;
-      });
-    }, 500);
-
     assembleVideoMutation.mutate(
       { projectId },
       {
-        onSettled: () => {
-          clearInterval(progressInterval);
+        onSuccess: () => {
           setAssemblyProgress(100);
+        },
+        onSettled: () => {
+          setIsAssembling(false);
         },
       }
     );

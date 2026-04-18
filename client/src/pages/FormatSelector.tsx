@@ -104,10 +104,9 @@ export default function FormatSelector() {
   const handleContinue = () => {
     updateMutation.mutate({
       projectId,
+      format: selectedFormat as any,
       template: selectedTemplate as any,
     });
-    // Nota: El formato ya está guardado en el proyecto desde la creación
-    // pero podría actualizarse aquí si es necesario
   };
 
   if (projectLoading) {

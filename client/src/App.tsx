@@ -4,6 +4,7 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import ScriptEditor from "./pages/ScriptEditor";
 import FormatSelector from "./pages/FormatSelector";
@@ -13,7 +14,8 @@ import VideoAssemblyV2 from "./pages/VideoAssemblyV2";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
+      <Route path="/" component={Home} />
+      <Route path="/dashboard" component={Dashboard} />
       <Route path="/editor/:projectId" component={ScriptEditor} />
       <Route path="/format/:projectId" component={FormatSelector} />
       <Route path="/images/:projectId" component={ImageGeneratorV2} />

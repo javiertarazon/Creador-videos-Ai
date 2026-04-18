@@ -10,8 +10,8 @@
 - [x] Implementar procedimiento para crear/editar/duplicar/eliminar proyectos
 - [x] Implementar procedimiento para obtener lista de proyectos del usuario
 - [x] Implementar procedimiento para obtener detalles de un proyecto
-- [ ] Implementar procedimiento para ensamblado de video con Remotion
-- [ ] Implementar procedimiento para obtener URL de descarga del video
+- [x] Implementar procedimiento para ensamblado de video con FFmpeg (implementado en lugar de Remotion)
+- [x] Implementar procedimiento para obtener URL de descarga del video
 
 ## Frontend - Dashboard
 - [x] Crear página de dashboard con historial de proyectos
@@ -23,7 +23,7 @@
 - [x] Campo de entrada para descripción del tema
 - [x] Botón para generar guión con IA
 - [x] Mostrar guión estructurado por escenas
-- [ ] Permitir edición manual del guión
+- [x] Permitir edición manual del guión (disponible en la página de editor)
 
 ## Frontend - Selector de Formato
 - [x] Crear página de selección de formato y plataforma
@@ -42,7 +42,7 @@
 
 ## Frontend - Ensamblado y Reproducción
 - [x] Crear página de ensamblado de video
-- [ ] Mostrar progreso del ensamblado
+- [x] Mostrar progreso del ensamblado (implementado en VideoAssemblyV2)
 - [x] Integrar reproductor de video
 - [x] Implementar botón de descarga
 
@@ -60,6 +60,17 @@
 - [x] Mejorar iconografía y diseño visual general
 - [x] Validar flujo de trabajo completo de principio a fin
 - [x] Corregir todos los errores de funcionamiento
+
+## Diagnóstico y Correcciones Críticas
+- [x] Verificar que el flujo completo funciona: crear proyecto → guión → formato → imágenes → video → descarga
+- [x] Asegurar que la generación de guiones con IA funciona realmente
+- [x] Asegurar que la generación de imágenes con IA funciona realmente
+- [x] Asegurar que el ensamblado de video funciona realmente (no simulado)
+- [x] Validar persistencia de datos entre pasos del flujo
+- [x] Corregir navegación entre páginas
+- [x] Implementar manejo robusto de errores
+- [x] Validar que el reproductor de video funciona
+- [x] Validar que la descarga de video funciona
 
 ## Pruebas y Despliegue
 - [x] Escribir pruebas unitarias con Vitest
