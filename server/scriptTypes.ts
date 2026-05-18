@@ -23,10 +23,20 @@ export interface ScriptContent {
  */
 export function parseScriptFromLLM(llmResponse: string): ScriptContent {
   try {
-    // Intenta parsear como JSON primero
-    const parsed = JSON.parse(llmResponse);
+    // Limpiar marcadores markdown (```json ... ```)
+    let cleanedResponse = llmResponse.trim();
+    
+    // Remover bloques de código markdown
+    cleanedResponse = cleanedResponse.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
+    
+    // Remover espacios en blanco adicionales
+    cleanedResponse = cleanedResponse.trim();
+    
+    // Intenta parsear como JSON
+    const parsed = JSON.parse(cleanedResponse);
     return parsed as ScriptContent;
   } catch (e) {
+    console.error('Error parsing JSON, falling back to text extraction:', e);
     // Si no es JSON válido, intenta extraer la estructura del texto
     return extractScriptFromText(llmResponse);
   }

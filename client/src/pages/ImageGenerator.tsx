@@ -77,7 +77,18 @@ export default function ImageGenerator() {
     );
   }
 
-  const scriptContent = project.scriptContent;
+  // Parse scriptContent si es string JSON
+  let scriptContent = null;
+  if (project.scriptContent) {
+    try {
+      scriptContent = typeof project.scriptContent === 'string' 
+        ? JSON.parse(project.scriptContent) 
+        : project.scriptContent;
+    } catch (e) {
+      console.error('Error parsing scriptContent:', e);
+    }
+  }
+  
   const sceneImages = project.sceneImages || {};
 
   if (!scriptContent) {

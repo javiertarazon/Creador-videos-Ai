@@ -64,10 +64,22 @@ export const projectsRouter = router({
       }
 
       const scenes = await getProjectScenes(input.projectId);
+      
+      // Parse scriptContent si existe, pero mantenerlo como string para evitar truncamiento de tRPC
+      let parsedScriptContent = null;
+      if (project.scriptContent) {
+        try {
+          const parsed = JSON.parse(project.scriptContent);
+          // Retornar como string JSON para evitar problemas de serialización
+          parsedScriptContent = project.scriptContent;
+        } catch (e) {
+          parsedScriptContent = null;
+        }
+      }
 
       return {
         ...project,
-        scriptContent: project.scriptContent ? JSON.parse(project.scriptContent) : null,
+        scriptContent: parsedScriptContent,
         sceneImages: project.sceneImages ? JSON.parse(project.sceneImages) : null,
         scenes,
       };

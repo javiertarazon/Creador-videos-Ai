@@ -33,7 +33,15 @@ export default function ScriptEditor() {
 
   useEffect(() => {
     if (project?.scriptContent) {
-      setScriptContent(project.scriptContent);
+      try {
+        const parsed = typeof project.scriptContent === 'string' 
+          ? JSON.parse(project.scriptContent) 
+          : project.scriptContent;
+        setScriptContent(parsed);
+      } catch (e) {
+        console.error('Error parsing scriptContent:', e);
+        setScriptContent(null);
+      }
     }
   }, [project]);
 

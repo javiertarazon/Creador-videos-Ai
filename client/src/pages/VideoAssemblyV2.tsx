@@ -13,11 +13,26 @@ export default function VideoAssemblyV2() {
 
   const [isAssembling, setIsAssembling] = useState(false);
   const [assemblyProgress, setAssemblyProgress] = useState(0);
+  const [scriptContent, setScriptContent] = useState<any>(null);
 
   const { data: project, isLoading: projectLoading, refetch } = trpc.projects.getById.useQuery(
     { projectId },
     { enabled: projectId > 0 }
   );
+
+  useEffect(() => {
+    if (project?.scriptContent) {
+      try {
+        const parsed = typeof project.scriptContent === 'string' 
+          ? JSON.parse(project.scriptContent) 
+          : project.scriptContent;
+        setScriptContent(parsed);
+      } catch (e) {
+        console.error('Error parsing scriptContent:', e);
+        setScriptContent(null);
+      }
+    }
+  }, [project]);
 
   const assembleVideoMutation = trpc.projects.assembleVideo.useMutation({
     onSuccess: (data) => {
@@ -73,7 +88,6 @@ export default function VideoAssemblyV2() {
     );
   }
 
-  const scriptContent = project.scriptContent;
   const hasAllImages = scriptContent?.scenes?.every((s: any) => project.sceneImages?.[s.sceneNumber]);
 
   return (
