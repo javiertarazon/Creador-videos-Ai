@@ -94,7 +94,7 @@ export default function FormatSelector() {
   const updateMutation = trpc.projects.update.useMutation({
     onSuccess: () => {
       toast.success("Formato y plantilla actualizados");
-      setLocation(`/images/${projectId}`);
+      setLocation(`/audio/${projectId}`);
     },
     onError: () => {
       toast.error("Error al actualizar el proyecto");

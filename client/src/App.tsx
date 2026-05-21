@@ -10,6 +10,8 @@ import ScriptEditor from "./pages/ScriptEditor";
 import FormatSelector from "./pages/FormatSelector";
 import ImageGeneratorV2 from "./pages/ImageGeneratorV2";
 import VideoAssemblyV2 from "./pages/VideoAssemblyV2";
+import AudioSelector from "./pages/AudioSelector";
+import VideoExporter from "./pages/VideoExporter";
 
 function Router() {
   return (
@@ -20,6 +22,8 @@ function Router() {
       <Route path="/format/:projectId" component={FormatSelector} />
       <Route path="/images/:projectId" component={ImageGeneratorV2} />
       <Route path="/assembly/:projectId" component={VideoAssemblyV2} />
+      <Route path="/audio/:id" component={AudioSelector} />
+      <Route path="/video/:id" component={VideoExporter} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
