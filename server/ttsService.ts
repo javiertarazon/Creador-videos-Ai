@@ -3,9 +3,16 @@ import fs from "fs";
 import path from "path";
 import { storagePut } from "./storage";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openai: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  if (!openai) {
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openai;
+}
 
 export type TTSVoice = "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer";
 
@@ -24,7 +31,8 @@ export async function generateNarration(
     const audioPath = path.join(tempDir, "narration.mp3");
 
     // Generar audio con OpenAI TTS
-    const mp3 = await openai.audio.speech.create({
+    const client = getOpenAIClient();
+    const mp3 = await client.audio.speech.create({
       model: "tts-1-hd",
       voice: voice,
       input: text,
