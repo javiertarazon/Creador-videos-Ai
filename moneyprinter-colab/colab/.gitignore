@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*.toml
+*.zip
+*.mp4
+*.mov
+*.mkv
+*.webm
+node_modules/
+renders/
+remotion-inbox/
