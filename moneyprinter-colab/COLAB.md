@@ -36,4 +36,7 @@ recibe claves ni credenciales. Los informes, planes, biblioteca importada y rend
 - Qwen-Image-2.1 y Remotion tienen licencias propias. Revisa sus términos antes de monetizar o distribuir.
 
 `Remotion_Qwen_Colab.ipynb` se conserva como opción reducida cuando solo se necesita renderizar un ZIP y ya
-se dispone de MoneyPrinterTurbo ejecutándose en otro entorno.
+se dispone de MoneyPrinterTurbo ejecutándose en otro entorno. Ese notebook requiere subir a
+`Mi unidad/MoneyPrinterTurbo/mpt-container/` las carpetas `remotion/` y `colab/` **más el archivo
+`design_profiles.py`** en la raíz; sin ese archivo `colab_runner` no importa los perfiles visuales y la
+primera celda falla con un error explícito.
